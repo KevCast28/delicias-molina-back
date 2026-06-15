@@ -2,9 +2,13 @@ package com.deliciasmolina.deliciasmolinaapi.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "offers")
@@ -16,10 +20,17 @@ public class Offer {
     private String title;
     @NotBlank(message = "Description is required")
     private String description;
-    private Float discountPercentage;
-    private Date startDate, endDate;
+    @NotNull
+    private BigDecimal discountPercentage;
+    @NotNull(message = "Start date is required")
+    private LocalDate startDate;
+    @NotNull(message = "End date is required")
+    private LocalDate endDate;
+    @Column(nullable = false)
+    private Boolean isActive = true;
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
-    private Boolean isActive;
 
 }

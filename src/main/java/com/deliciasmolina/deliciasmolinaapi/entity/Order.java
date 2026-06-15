@@ -5,10 +5,12 @@ import com.deliciasmolina.deliciasmolinaapi.enums.OrderType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "orders")
@@ -22,16 +24,20 @@ public class Order {
     @NotBlank(message = "Contact number is required")
     private String telephone;
     @Enumerated(EnumType.STRING)
-    @NotBlank(message = "Order type is required")
+    @NotNull(message = "Order type is required")
     private OrderType orderType;
     private BigDecimal quotedPrice;
     private String flavor;
     private Integer peopleQuantity;
     private String referenceImage;
     private String comments;
-    private Date deliveryDate;
+    @NotNull(message = "Date is required")
+    private LocalDate deliveryDate;
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    @NotNull(message = "Status is required")
+    private OrderStatus orderStatus = OrderStatus.PENDING;
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
