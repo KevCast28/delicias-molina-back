@@ -18,7 +18,7 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @NotBlank(message = "Client name is required")
     private String clientName;
     @NotBlank(message = "Contact number is required")

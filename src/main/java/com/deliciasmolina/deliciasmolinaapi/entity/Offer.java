@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @NotBlank(message = "Title is required")
     private String title;
     @NotBlank(message = "Description is required")

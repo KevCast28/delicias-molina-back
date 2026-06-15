@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @NotBlank(message = "Name is required")
     private String name;
     @Email(message = "Invalid email format")
