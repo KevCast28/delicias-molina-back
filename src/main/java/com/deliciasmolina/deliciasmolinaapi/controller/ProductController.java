@@ -1,7 +1,6 @@
 package com.deliciasmolina.deliciasmolinaapi.controller;
 
 import com.deliciasmolina.deliciasmolinaapi.entity.Product;
-import com.deliciasmolina.deliciasmolinaapi.service.interfaces.CategoryService;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
