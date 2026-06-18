@@ -17,7 +17,7 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank(message = "Title is required")
-    private String title;
+    private String offerTitle;
     @NotBlank(message = "Description is required")
     private String description;
     @NotNull

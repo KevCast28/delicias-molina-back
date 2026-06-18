@@ -1,18 +1,19 @@
 package com.deliciasmolina.deliciasmolinaapi.service.interfaces;
 
-import com.deliciasmolina.deliciasmolinaapi.entity.Category;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.CategoryRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.CategoryResponseDTO;
 
 import java.util.List;
 
 public interface CategoryService {
 
-    List<Category> getAll();
+    List<CategoryResponseDTO> getAll();
 
-    Category getById(Long id);
+    CategoryResponseDTO getById(Long id);
 
-    Category create(Category category);
+    CategoryResponseDTO create(CategoryRequestDTO categoryRequestDTO);
 
-    Category update(Long id, Category category);
+    CategoryResponseDTO update(Long id, CategoryRequestDTO categoryRequestDTO);
 
     void delete(Long id);
 }

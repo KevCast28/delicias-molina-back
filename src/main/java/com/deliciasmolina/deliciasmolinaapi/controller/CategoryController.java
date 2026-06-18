@@ -1,9 +1,12 @@
 package com.deliciasmolina.deliciasmolinaapi.controller;
 
-import com.deliciasmolina.deliciasmolinaapi.entity.Category;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.CategoryRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.CategoryResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,27 +20,29 @@ public class CategoryController {
 
 //     Get all categories
     @GetMapping
-    public List<Category> getAll() {
-        return categoryService.getAll();
+    public ResponseEntity<List<CategoryResponseDTO>> getAll() {
+        return ResponseEntity.ok(categoryService.getAll());
     }
 
     @GetMapping("/{id}")
-    public Category getById(@PathVariable Long id) {
-        return categoryService.getById(id);
+    public ResponseEntity<CategoryResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.getById(id));
     }
 
     @PostMapping
-    public Category create(@Valid @RequestBody Category category) {
-        return categoryService.create(category);
+    public ResponseEntity<CategoryResponseDTO> create(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(categoryRequestDTO));
     }
 
     @PutMapping("/{id}")
-    public Category update(@PathVariable Long id, @Valid @RequestBody Category category) {
-        return categoryService.update(id, category);
+    public ResponseEntity<CategoryResponseDTO> update(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
+        return ResponseEntity.ok(categoryService.update(id, categoryRequestDTO));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
