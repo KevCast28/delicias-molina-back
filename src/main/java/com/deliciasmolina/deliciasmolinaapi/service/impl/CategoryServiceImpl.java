@@ -53,16 +53,16 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDTO update(Long id, CategoryRequestDTO categoryRequestDTO) {
 
+        String categoryName = categoryRequestDTO.getCategoryName().trim();
+
         Category existing = categoryRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
-        if(categoryRepository.existsByCategoryNameIgnoreCase(categoryRequestDTO.getCategoryName()) && !existing.getCategoryName()
-                .equalsIgnoreCase(categoryRequestDTO.getCategoryName())) {
+        if(categoryRepository.existsByCategoryNameIgnoreCase(categoryName) && !existing.getCategoryName()
+                .equalsIgnoreCase(categoryName)) {
 
             throw new DuplicateResourceException("Category already exists");
         }
-
-        String categoryName = categoryRequestDTO.getCategoryName().trim();
 
         existing.setCategoryName(categoryName);
 

@@ -3,6 +3,10 @@ package com.deliciasmolina.deliciasmolinaapi.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,6 +16,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "offers")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
