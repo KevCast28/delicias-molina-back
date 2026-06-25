@@ -18,7 +18,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-//     Get all categories
+    //     Get all categories
     @GetMapping
     public ResponseEntity<List<CategoryResponseDTO>> getAll() {
         return ResponseEntity.ok(categoryService.getAll());
@@ -31,7 +31,7 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> create(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(categoryRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(categoryRequestDTO));
     }
 
     @PutMapping("/{id}")

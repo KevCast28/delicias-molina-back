@@ -1,18 +1,21 @@
 package com.deliciasmolina.deliciasmolinaapi.service.interfaces;
 
-import com.deliciasmolina.deliciasmolinaapi.entity.Product;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.ProductRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.ProductResponseDTO;
+import com.deliciasmolina.deliciasmolinaapi.entity.Category;
+import com.deliciasmolina.deliciasmolinaapi.entity.Offer;
 
 import java.util.List;
 
 public interface ProductService {
 
-    List<Product> getAll();
+    List<ProductResponseDTO> getAll();
 
-    Product getById(Long id);
+    ProductResponseDTO getById(Long id);
 
-    Product create(Product product);
+    ProductResponseDTO create(ProductRequestDTO productRequestDTO);
 
-    Product update(Long id, Product product);
+    ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO);
 
     void delete(Long id);
 }
