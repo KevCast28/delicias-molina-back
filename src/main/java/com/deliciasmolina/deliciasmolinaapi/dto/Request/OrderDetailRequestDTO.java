@@ -16,12 +16,4 @@ public class OrderDetailRequestDTO {
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be greater than zero")
     private Integer quantity;
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be greater than zero")
-    @Digits(integer = 10, fraction = 2)
-    private BigDecimal unitPrice;
-    @NotNull(message = "Subtotal is required")
-    @Positive(message = "Subtotal must be greater than zero")
-    @Digits(integer = 10, fraction = 2)
-    private BigDecimal subtotal;
 }
