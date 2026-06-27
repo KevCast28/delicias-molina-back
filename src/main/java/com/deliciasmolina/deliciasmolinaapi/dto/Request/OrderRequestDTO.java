@@ -17,7 +17,7 @@ public class OrderRequestDTO {
     private OrderType orderType;
     private String flavor;
     private Integer peopleQuantity;
-    private String referenceImage;
+    private String imageReference;
     private String comments;
     @NotNull
     private LocalDate deliveryDate;

@@ -1,8 +1,13 @@
 package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Order;
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderStatus;
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderType;
+import com.deliciasmolina.deliciasmolinaapi.exception.BadRequestException;
+import com.deliciasmolina.deliciasmolinaapi.exception.ResourceNotFoundException;
+import com.deliciasmolina.deliciasmolinaapi.mapper.OrderMapper;
 import com.deliciasmolina.deliciasmolinaapi.repository.OrderRepository;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -18,64 +23,87 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     @Override
-    public List<Order> getAll() {
-        return orderRepository.findAll();
+    public List<OrderResponseDTO> getAll() {
+        return orderRepository.findAll()
+                .stream().map(OrderMapper::toResponse).toList();
     }
 
     @Override
-    public Order getById(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    public OrderResponseDTO getById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+
+        return OrderMapper.toResponse(order);
     }
 
     @Override
-    public Order create(Order order) {
-
+    public OrderResponseDTO create(OrderRequestDTO orderRequestDTO) {
+        Order order = OrderMapper.toEntity(orderRequestDTO);
 
         if (order.getOrderType() == OrderType.CUSTOM) {
             if (order.getFlavor() == null || order.getFlavor().isBlank()) {
-                throw new RuntimeException("Flavor is required for custom orders");
+                throw new BadRequestException("Flavor is required for custom orders");
             }
 
             if (order.getPeopleQuantity() == null) {
-                throw new RuntimeException("People quantity is required for custom orders");
+                throw new BadRequestException("People quantity is required for custom orders");
             }
 
-//          Price set for custom orders is initially null
             order.setQuotedPrice(null);
-        }
-
-        if (order.getDeliveryDate() == null) {
-            throw new RuntimeException("Delivery date is required");
+        } else {
+            order.setFlavor(null);
+            order.setPeopleQuantity(null);
+            order.setImageReference(null);
+            order.setComments(null);
         }
 
         if (order.getDeliveryDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("Delivery date cannot be in the past");
+            throw new BadRequestException("Delivery date cannot be in the past");
         }
 
-        if (order.getOrderStatus() == null) {
-            order.setOrderStatus(OrderStatus.PENDING);
-        }
+        order.setOrderStatus(OrderStatus.PENDING);
 
-        return orderRepository.save(order);
+        return OrderMapper.toResponse(orderRepository.save(order));
     }
 
     @Override
-    public Order update(Long id, Order order) {
-        Order existing = getById(id);
+    public OrderResponseDTO update(Long id, OrderRequestDTO orderRequestDTO) {
+        Order existing = orderRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
-        existing.setClientName(order.getClientName());
-        existing.setTelephone(order.getTelephone());
-        existing.setDeliveryDate(order.getDeliveryDate());
-        existing.setOrderStatus(order.getOrderStatus());
+        OrderMapper.updateEntity(existing, orderRequestDTO);
 
-        return orderRepository.save(existing);
+        if (existing.getOrderType() == OrderType.CUSTOM) {
+            if (existing.getFlavor() == null || existing.getFlavor().isBlank()) {
+                throw new BadRequestException("Flavor is required");
+            }
+
+            if (existing.getPeopleQuantity() == null) {
+                throw new BadRequestException("People quantity is required");
+            }
+
+            existing.setQuotedPrice(null);
+        } else {
+            existing.setFlavor(null);
+            existing.setPeopleQuantity(null);
+            existing.setImageReference(null);
+            existing.setComments(null);
+        }
+
+        if (existing.getDeliveryDate().isBefore(LocalDate.now())) {
+            throw new BadRequestException("Delivery date cannot be in the past");
+        }
+
+        Order updated = orderRepository.save(existing);
+
+        return OrderMapper.toResponse(updated);
     }
 
     @Override
     public void delete(Long id) {
-        Order exists = getById(id);
+        Order existing = orderRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
-        orderRepository.delete(exists);
+        orderRepository.delete(existing);
     }
 }

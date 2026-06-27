@@ -13,6 +13,10 @@ public class OrderResponseDTO {
     private String clientName;
     private String telephone;
     private OrderType orderType;
+    private String flavor;
+    private Integer peopleQuantity;
+    private String imageReference;
+    private String comments;
     private BigDecimal quotedPrice;
     private LocalDate deliveryDate;
     private OrderStatus orderStatus;

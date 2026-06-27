@@ -37,7 +37,7 @@ public class Order {
     private BigDecimal quotedPrice;
     private String flavor;
     private Integer peopleQuantity;
-    private String referenceImage;
+    private String imageReference;
     private String comments;
     @NotNull(message = "Date is required")
     private LocalDate deliveryDate;
