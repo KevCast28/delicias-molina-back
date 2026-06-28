@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDTO> getAll() {
-        return userRepository.findAll()
+        return userRepository.findByIsActiveTrue()
                 .stream().map(UserMapper::toResponse).toList();
     }
 
@@ -30,6 +30,10 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO getById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        if (!user.getIsActive()) {
+            throw new ResourceNotFoundException("User not found");
+        }
 
         return UserMapper.toResponse(user);
     }
@@ -80,13 +84,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(Long id) {
-        User existing = userRepository.findById(id)
+    public UserResponseDTO activate(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        existing.setIsActive(false);
+        user.setIsActive(true);
 
-        userRepository.save(existing);
+        User updatedUser = userRepository.save(user);
 
+        return UserMapper.toResponse(updatedUser);
+    }
+
+    @Override
+    public UserResponseDTO deactivate(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        user.setIsActive(false);
+
+        User updatedUser = userRepository.save(user);
+
+        return UserMapper.toResponse(updatedUser);
     }
 }

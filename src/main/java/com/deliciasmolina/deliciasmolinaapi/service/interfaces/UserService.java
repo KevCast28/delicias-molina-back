@@ -15,5 +15,7 @@ public interface UserService {
 
     UserResponseDTO update(Long id, UserRequestDTO userRequestDTO);
 
-    void delete(Long id);
+    UserResponseDTO activate(Long id);
+
+    UserResponseDTO deactivate(Long id);
 }
