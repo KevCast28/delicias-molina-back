@@ -33,7 +33,7 @@ public final class OfferMapper {
     public static void updateEntity(Offer offer, OfferRequestDTO dto) {
 
         offer.setOfferTitle(dto.getOfferTitle().trim());
-        offer.setDescription(dto.getDescription());
+        offer.setDescription(dto.getDescription().trim());
         offer.setDiscountPercentage(dto.getDiscountPercentage());
         offer.setStartDate(dto.getStartDate());
         offer.setEndDate(dto.getEndDate());
