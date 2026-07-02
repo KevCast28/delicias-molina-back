@@ -1,15 +1,17 @@
 package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.ChangePasswordRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.UserResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.User;
+import com.deliciasmolina.deliciasmolinaapi.exception.BadRequestException;
 import com.deliciasmolina.deliciasmolinaapi.exception.DuplicateResourceException;
 import com.deliciasmolina.deliciasmolinaapi.exception.ResourceNotFoundException;
 import com.deliciasmolina.deliciasmolinaapi.mapper.UserMapper;
 import com.deliciasmolina.deliciasmolinaapi.repository.UserRepository;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserResponseDTO> getAll() {
@@ -40,6 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO create(UserRequestDTO userRequestDTO) {
+
         String name = userRequestDTO.getName().trim();
 
         String username = userRequestDTO.getUsername().trim();
@@ -54,6 +58,8 @@ public class UserServiceImpl implements UserService {
 
         User user = UserMapper.toEntity(userRequestDTO);
 
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         User saved = userRepository.save(user);
 
         return UserMapper.toResponse(saved);
@@ -61,6 +67,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO update(Long id, UserRequestDTO userRequestDTO) {
+
         String name = userRequestDTO.getName().trim();
 
         String username = userRequestDTO.getUsername().trim();
@@ -81,6 +88,29 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.save(existing);
 
         return UserMapper.toResponse(updatedUser);
+    }
+
+    @Override
+    public void changePassword(Long id, ChangePasswordRequestDTO changePasswordRequestDTO) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        if (!passwordEncoder.matches(changePasswordRequestDTO.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(changePasswordRequestDTO.getNewPassword(), user.getPassword())) {
+            throw new BadRequestException("New password cannot be the same as current password");
+        }
+
+        if (user.getPassword() == null) {
+            throw new BadRequestException("Invalid user state");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordRequestDTO.getNewPassword()));
+
+        userRepository.save(user);
     }
 
     @Override

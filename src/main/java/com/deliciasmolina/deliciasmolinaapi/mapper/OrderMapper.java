@@ -36,13 +36,13 @@ public final class OrderMapper {
 
     public static void updateEntity(Order order, OrderRequestDTO dto) {
 
-        order.setClientName(dto.getClientName().trim());
-        order.setTelephone(dto.getTelephone().trim());
+        order.setClientName(dto.getClientName().trim().replaceAll("\\s+", " "));
+        order.setTelephone(dto.getTelephone().trim().replaceAll("\\s+", " "));
         order.setOrderType(dto.getOrderType());
-        order.setFlavor(dto.getFlavor() != null ? dto.getFlavor().trim() : null);
+        order.setFlavor(dto.getFlavor() != null ? dto.getFlavor().trim().replaceAll("\\s+", " ") : null);
         order.setPeopleQuantity(dto.getPeopleQuantity());
-        order.setImageReference(dto.getImageReference() != null ? dto.getImageReference().trim() : null);
-        order.setComments(dto.getComments() != null ? dto.getComments().trim() : null);
+        order.setImageReference(dto.getImageReference() != null ? dto.getImageReference().trim().replaceAll("\\s+", " ") : null);
+        order.setComments(dto.getComments() != null ? dto.getComments().trim().replaceAll("\\s+", " ") : null);
         order.setDeliveryDate(dto.getDeliveryDate());
     }
 }

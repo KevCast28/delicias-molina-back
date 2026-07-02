@@ -1,5 +1,6 @@
 package com.deliciasmolina.deliciasmolinaapi.service.interfaces;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.ChangePasswordRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.UserResponseDTO;
 
@@ -14,6 +15,8 @@ public interface UserService {
     UserResponseDTO create(UserRequestDTO userRequestDTO);
 
     UserResponseDTO update(Long id, UserRequestDTO userRequestDTO);
+
+    void changePassword(Long id, ChangePasswordRequestDTO changePasswordRequestDTO);
 
     UserResponseDTO activate(Long id);
 

@@ -16,7 +16,7 @@ public class UserRequestDTO {
     @Size(min = 4, max = 12)
     private String username;
     @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 255)
+    @Size(min = 8, max = 20)
     private String password;
     @NotNull(message = "Role is required")
     private UserRole userRole;

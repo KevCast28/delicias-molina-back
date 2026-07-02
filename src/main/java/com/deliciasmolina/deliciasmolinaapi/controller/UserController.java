@@ -1,5 +1,6 @@
 package com.deliciasmolina.deliciasmolinaapi.controller;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.ChangePasswordRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.UserResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.UserService;
@@ -36,6 +37,13 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> update(@PathVariable Long id, @Valid @RequestBody UserRequestDTO userRequestDTO) {
         return ResponseEntity.ok(userService.update(id, userRequestDTO));
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<Void> changePassword(@PathVariable Long id, @Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
+        userService.changePassword(id, changePasswordRequestDTO);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/activate")

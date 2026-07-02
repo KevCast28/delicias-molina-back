@@ -34,10 +34,10 @@ public final class ProductMapper {
 
     public static void updateEntity(Product product, ProductRequestDTO dto, Category category, Offer offer) {
 
-        product.setProductName(dto.getProductName().trim());
-        product.setDescription(dto.getDescription());
+        product.setProductName(dto.getProductName().trim().replaceAll("\\s+", " "));
+        product.setDescription(dto.getDescription().trim().replaceAll("\\s+", " "));
         product.setBasePrice(dto.getBasePrice());
-        product.setImageUrl(dto.getImageUrl());
+        product.setImageUrl(dto.getImageUrl().trim().replaceAll("\\s+", " "));
         product.setCategory(category);
         product.setOffer(offer);
     }

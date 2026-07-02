@@ -34,6 +34,5 @@ public final class UserMapper {
         user.setUsername(dto.getUsername().trim());
         user.setPassword(dto.getPassword());
         user.setUserRole(dto.getUserRole());
-        user.setIsActive(dto.getIsActive());
     }
 }

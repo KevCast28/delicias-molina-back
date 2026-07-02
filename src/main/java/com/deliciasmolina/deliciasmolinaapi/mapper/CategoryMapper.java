@@ -11,7 +11,7 @@ public final class CategoryMapper {
     public static Category toEntity(CategoryRequestDTO dto) {
         Category category = new Category();
 
-        category.setCategoryName(dto.getCategoryName());
+        updateEntity(category, dto);
 
         return category;
     }
@@ -23,5 +23,10 @@ public final class CategoryMapper {
         dto.setCategoryName(category.getCategoryName());
 
         return dto;
+    }
+
+    public static void updateEntity(Category category, CategoryRequestDTO dto) {
+
+        category.setCategoryName(dto.getCategoryName().trim().replaceAll("\\s+", " "));
     }
 }
