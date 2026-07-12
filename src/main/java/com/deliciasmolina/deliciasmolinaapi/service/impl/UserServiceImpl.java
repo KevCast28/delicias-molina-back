@@ -1,7 +1,8 @@
 package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.ChangePasswordRequestDTO;
-import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserCreateRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserUpdateRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.UserResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.User;
 import com.deliciasmolina.deliciasmolinaapi.exception.BadRequestException;
@@ -42,21 +43,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO create(UserRequestDTO userRequestDTO) {
+    public UserResponseDTO create(UserCreateRequestDTO userCreateRequestDTO) {
 
-        String name = userRequestDTO.getName().trim();
+        String name = userCreateRequestDTO.getName().trim();
 
-        String username = userRequestDTO.getUsername().trim();
+        String username = userCreateRequestDTO.getUsername().trim();
 
         if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new DuplicateResourceException("Username already exists");
         }
 
-        userRequestDTO.setName(name);
+        userCreateRequestDTO.setName(name);
 
-        userRequestDTO.setUsername(username);
+        userCreateRequestDTO.setUsername(username);
 
-        User user = UserMapper.toEntity(userRequestDTO);
+        User user = UserMapper.toEntity(userCreateRequestDTO);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -66,24 +67,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO update(Long id, UserRequestDTO userRequestDTO) {
+    public UserResponseDTO update(Long id, UserUpdateRequestDTO userUpdateRequestDTO) {
 
-        String name = userRequestDTO.getName().trim();
-
-        String username = userRequestDTO.getUsername().trim();
+        String name = userUpdateRequestDTO.getName().trim();
 
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        if (userRepository.existsByUsernameIgnoreCase(username) && !existing.getUsername().equalsIgnoreCase(username)) {
-            throw new DuplicateResourceException("Username already exists");
-        }
+        existing.setName(name);
 
-        userRequestDTO.setName(name);
-
-        userRequestDTO.setUsername(username);
-
-        UserMapper.updateEntity(existing, userRequestDTO);
+        existing.setUserRole(userUpdateRequestDTO.getUserRole());
 
         User updatedUser = userRepository.save(existing);
 

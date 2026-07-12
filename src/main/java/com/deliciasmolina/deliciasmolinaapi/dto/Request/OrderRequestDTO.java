@@ -1,10 +1,12 @@
 package com.deliciasmolina.deliciasmolinaapi.dto.Request;
 
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class OrderRequestDTO {
@@ -26,4 +28,7 @@ public class OrderRequestDTO {
     private String comments;
     @NotNull(message = "Delivery date is required")
     private LocalDate deliveryDate;
+    @NotEmpty(message = "Order must contain at least one item")
+    @Valid
+    private List<OrderItemRequestDTO> items;
 }

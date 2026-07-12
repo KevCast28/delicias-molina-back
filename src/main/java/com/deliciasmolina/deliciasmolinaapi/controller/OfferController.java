@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,26 +19,31 @@ public class OfferController {
 
     private final OfferService offerService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @GetMapping
     public ResponseEntity<List<OfferResponseDTO>> getAll() {
         return ResponseEntity.ok(offerService.getAll());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<OfferResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(offerService.getById(id));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping
     public ResponseEntity<OfferResponseDTO> create(@Valid @RequestBody OfferRequestDTO offerRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(offerService.create(offerRequestDTO));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OfferResponseDTO> update(@PathVariable Long id, @Valid @RequestBody OfferRequestDTO offerRequestDTO) {
         return ResponseEntity.ok(offerService.update(id, offerRequestDTO));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         offerService.delete(id);

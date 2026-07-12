@@ -1,6 +1,7 @@
 package com.deliciasmolina.deliciasmolinaapi.mapper;
 
-import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserCreateRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.UserUpdateRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.UserResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.User;
 
@@ -8,10 +9,13 @@ public final class UserMapper {
 
     private UserMapper() {}
 
-    public static User toEntity(UserRequestDTO dto) {
+    public static User toEntity(UserCreateRequestDTO dto) {
         User user = new User();
 
-        updateEntity(user, dto);
+        user.setName(dto.getName().trim());
+        user.setUsername(dto.getUsername().trim());
+        user.setPassword(dto.getPassword().trim());
+        user.setUserRole(dto.getUserRole());
 
         return user;
     }
@@ -26,13 +30,5 @@ public final class UserMapper {
         dto.setIsActive(user.getIsActive());
 
         return dto;
-    }
-
-    public static void updateEntity(User user, UserRequestDTO dto) {
-
-        user.setName(dto.getName().trim());
-        user.setUsername(dto.getUsername().trim());
-        user.setPassword(dto.getPassword());
-        user.setUserRole(dto.getUserRole());
     }
 }

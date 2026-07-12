@@ -1,26 +1,35 @@
 package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderItemRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Order;
+import com.deliciasmolina.deliciasmolinaapi.entity.OrderDetail;
+import com.deliciasmolina.deliciasmolinaapi.entity.Product;
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderStatus;
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderType;
 import com.deliciasmolina.deliciasmolinaapi.exception.BadRequestException;
+import com.deliciasmolina.deliciasmolinaapi.exception.DuplicateResourceException;
 import com.deliciasmolina.deliciasmolinaapi.exception.ResourceNotFoundException;
 import com.deliciasmolina.deliciasmolinaapi.mapper.OrderMapper;
 import com.deliciasmolina.deliciasmolinaapi.repository.OrderRepository;
+import com.deliciasmolina.deliciasmolinaapi.repository.ProductRepository;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
     @Override
     public List<OrderResponseDTO> getAll() {
@@ -49,12 +58,44 @@ public class OrderServiceImpl implements OrderService {
                 throw new BadRequestException("People quantity is required for custom orders");
             }
 
-            order.setQuotedPrice(null);
+            if (orderRequestDTO.getItems() != null && !orderRequestDTO.getItems().isEmpty()) {
+                throw new BadRequestException("Custom orders cannot contain products");
+            }
+
+            order.setCustomQuotedPrice(null);
         } else {
             order.setFlavor(null);
             order.setPeopleQuantity(null);
             order.setImageReference(null);
             order.setComments(null);
+
+            if (orderRequestDTO.getItems() == null || orderRequestDTO.getItems().isEmpty()) {
+                throw new BadRequestException("Order must contain at least one product");
+            }
+
+            Set<Long> productIds = new HashSet<>();
+
+            for (OrderItemRequestDTO item : orderRequestDTO.getItems()) {
+
+                if (!productIds.add(item.getProductId())) {
+                    throw new DuplicateResourceException("Duplicate products are not allowed in the same order");
+                }
+
+                Product product = productRepository.findById(item.getProductId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + item.getProductId()));
+
+                OrderDetail detail = new OrderDetail();
+
+                detail.setProduct(product);
+
+                detail.setQuantity(item.getQuantity());
+
+                detail.setUnitPrice(product.getBasePrice());
+
+                detail.setSubtotal(product.getBasePrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+
+                order.addOrderDetail(detail);
+            }
         }
 
         if (order.getDeliveryDate().isBefore(LocalDate.now())) {
@@ -63,7 +104,9 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderStatus(OrderStatus.PENDING);
 
-        return OrderMapper.toResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+
+        return OrderMapper.toResponse(savedOrder);
     }
 
     @Override
@@ -82,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new BadRequestException("People quantity is required");
             }
 
-            existing.setQuotedPrice(null);
+            existing.setCustomQuotedPrice(null);
         } else {
             existing.setFlavor(null);
             existing.setPeopleQuantity(null);

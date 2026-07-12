@@ -7,17 +7,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class UserRequestDTO {
+public class UserUpdateRequestDTO {
 
     @NotBlank(message = "Name is required")
     @Size(max = 50)
     private String name;
-    @NotBlank(message = "Username is required")
-    @Size(min = 4, max = 12)
-    private String username;
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 20)
-    private String password;
     @NotNull(message = "Role is required")
     private UserRole userRole;
 }

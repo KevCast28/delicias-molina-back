@@ -15,6 +15,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -34,7 +36,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Order type is required")
     private OrderType orderType;
-    private BigDecimal quotedPrice;
+    private BigDecimal customQuotedPrice;
     private String flavor;
     private Integer peopleQuantity;
     private String imageReference;
@@ -44,6 +46,12 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status is required")
     private OrderStatus orderStatus = OrderStatus.PENDING;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderDetail> orderDetails = new ArrayList<>();
+    public void addOrderDetail(OrderDetail detail) {
+        detail.setOrder(this);
+        this.orderDetails.add(detail);
+    }
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
