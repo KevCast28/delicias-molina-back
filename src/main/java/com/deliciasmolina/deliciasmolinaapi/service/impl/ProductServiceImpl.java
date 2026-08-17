@@ -1,8 +1,15 @@
 package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.ProductRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.ProductResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Category;
+import com.deliciasmolina.deliciasmolinaapi.entity.Offer;
 import com.deliciasmolina.deliciasmolinaapi.entity.Product;
+import com.deliciasmolina.deliciasmolinaapi.exception.DuplicateResourceException;
+import com.deliciasmolina.deliciasmolinaapi.exception.ResourceNotFoundException;
+import com.deliciasmolina.deliciasmolinaapi.mapper.ProductMapper;
 import com.deliciasmolina.deliciasmolinaapi.repository.CategoryRepository;
+import com.deliciasmolina.deliciasmolinaapi.repository.OfferRepository;
 import com.deliciasmolina.deliciasmolinaapi.repository.ProductRepository;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -16,50 +23,83 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final OfferRepository offerRepository;
 
     @Override
-    public List<Product> getAll() {
-        return productRepository.findAll();
+    public List<ProductResponseDTO> getAll() {
+        return productRepository.findAll()
+                .stream().map(ProductMapper::toResponse).toList();
     }
 
     @Override
-    public Product getById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    public ProductResponseDTO getById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+
+        return ProductMapper.toResponse(product);
     }
 
     @Override
-    public Product create(Product product) {
-        return productRepository.save(product);
-    }
+    public ProductResponseDTO create(ProductRequestDTO productRequestDTO) {
+        String productName = productRequestDTO.getProductName().trim();
 
-    @Override
-    public Product update(Long id, Product product) {
-        Product existing = getById(id);
-
-        existing.setProductName(product.getProductName());
-        existing.setDescription(product.getDescription());
-        existing.setBasePrice(product.getBasePrice());
-        existing.setImageUrl(product.getImageUrl());
-
-//        Validate if category already exists
-        if (existing.getCategory() != null) {
-            Long categoryId = product.getCategory().getId();
-
-            Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-
-            existing.setCategory(category);
+        if (productRepository.existsByProductNameIgnoreCase(productName)) {
+            throw new DuplicateResourceException("Product already exists");
         }
 
-        existing.setOffer(product.getOffer());
+        Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productRequestDTO.getCategoryId()));
 
-        return productRepository.save(existing);
+        Offer offer = null;
+
+        if (productRequestDTO.getOfferId() != null) {
+            offer = offerRepository.findById(productRequestDTO.getOfferId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Offer not found with id: " + productRequestDTO.getOfferId()));
+        }
+
+        productRequestDTO.setProductName(productName);
+
+        Product product = ProductMapper.toEntity(productRequestDTO, category, offer);
+
+        Product saved = productRepository.save(product);
+
+        return ProductMapper.toResponse(saved);
+    }
+
+    @Override
+    public ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO) {
+        String productName = productRequestDTO.getProductName().trim();
+
+        Product existing = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+
+        if (productRepository.existsByProductNameIgnoreCase(productName) && !existing.getProductName().equalsIgnoreCase(productName)) {
+            throw new DuplicateResourceException("Product already exists");
+        }
+
+        Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productRequestDTO.getCategoryId()));
+
+        Offer offer = null;
+
+        if (productRequestDTO.getOfferId() != null) {
+            offer = offerRepository.findById(productRequestDTO.getOfferId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Offer not found with id: " + productRequestDTO.getOfferId()));
+        }
+
+        productRequestDTO.setProductName(productName);
+
+        ProductMapper.updateEntity(existing, productRequestDTO, category, offer);
+
+        Product updatedProduct = productRepository.save(existing);
+
+        return ProductMapper.toResponse(updatedProduct);
     }
 
     @Override
     public void delete(Long id) {
-        Product existing = getById(id);
+        Product existing = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         productRepository.delete(existing);
     }

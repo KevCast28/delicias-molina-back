@@ -1,17 +1,20 @@
 package com.deliciasmolina.deliciasmolinaapi.service.interfaces;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderUpdateRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Order;
 
 import java.util.List;
 
 public interface OrderService {
-    List<Order> getAll();
+    List<OrderResponseDTO> getAll();
 
-    Order getById(Long id);
+    OrderResponseDTO getById(Long id);
 
-    Order create(Order order);
+    OrderResponseDTO create(OrderRequestDTO orderRequestDTO);
 
-    Order update(Long id, Order order);
+    OrderResponseDTO update(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO);
 
     void delete(Long id);
 }

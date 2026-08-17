@@ -1,81 +1,150 @@
 package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderItemRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderUpdateRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Order;
+import com.deliciasmolina.deliciasmolinaapi.entity.OrderDetail;
+import com.deliciasmolina.deliciasmolinaapi.entity.Product;
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderStatus;
 import com.deliciasmolina.deliciasmolinaapi.enums.OrderType;
+import com.deliciasmolina.deliciasmolinaapi.exception.BadRequestException;
+import com.deliciasmolina.deliciasmolinaapi.exception.DuplicateResourceException;
+import com.deliciasmolina.deliciasmolinaapi.exception.ResourceNotFoundException;
+import com.deliciasmolina.deliciasmolinaapi.mapper.OrderMapper;
 import com.deliciasmolina.deliciasmolinaapi.repository.OrderRepository;
+import com.deliciasmolina.deliciasmolinaapi.repository.ProductRepository;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
     @Override
-    public List<Order> getAll() {
-        return orderRepository.findAll();
+    public List<OrderResponseDTO> getAll() {
+        return orderRepository.findAll()
+                .stream().map(OrderMapper::toResponse).toList();
     }
 
     @Override
-    public Order getById(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    public OrderResponseDTO getById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+
+        return OrderMapper.toResponse(order);
     }
 
     @Override
-    public Order create(Order order) {
-
+    public OrderResponseDTO create(OrderRequestDTO orderRequestDTO) {
+        Order order = OrderMapper.toEntity(orderRequestDTO);
 
         if (order.getOrderType() == OrderType.CUSTOM) {
             if (order.getFlavor() == null || order.getFlavor().isBlank()) {
-                throw new RuntimeException("Flavor is required for custom orders");
+                throw new BadRequestException("Flavor is required for custom orders");
             }
 
             if (order.getPeopleQuantity() == null) {
-                throw new RuntimeException("People quantity is required for custom orders");
+                throw new BadRequestException("People quantity is required for custom orders");
             }
 
-//          Price set for custom orders is initially null
-            order.setQuotedPrice(null);
-        }
+            if (orderRequestDTO.getItems() != null && !orderRequestDTO.getItems().isEmpty()) {
+                throw new BadRequestException("Custom orders cannot contain products");
+            }
 
-        if (order.getDeliveryDate() == null) {
-            throw new RuntimeException("Delivery date is required");
+            order.setCustomQuotedPrice(null);
+        } else {
+            order.setFlavor(null);
+            order.setPeopleQuantity(null);
+            order.setImageReference(null);
+            order.setComments(null);
+
+            if (orderRequestDTO.getItems() == null || orderRequestDTO.getItems().isEmpty()) {
+                throw new BadRequestException("Order must contain at least one product");
+            }
+
+            Set<Long> productIds = new HashSet<>();
+
+            BigDecimal total = BigDecimal.ZERO;
+
+            for (OrderItemRequestDTO item : orderRequestDTO.getItems()) {
+
+                if (!productIds.add(item.getProductId())) {
+                    throw new DuplicateResourceException("Duplicate products are not allowed in the same order");
+                }
+
+                Product product = productRepository.findById(item.getProductId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + item.getProductId()));
+
+                OrderDetail detail = new OrderDetail();
+
+                detail.setProduct(product);
+
+                detail.setQuantity(item.getQuantity());
+
+                detail.setUnitPrice(product.getBasePrice());
+
+                BigDecimal subtotal = product.getBasePrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                detail.setSubtotal(subtotal);
+
+                total = total.add(subtotal);
+
+                order.addOrderDetail(detail);
+            }
+
+            order.setTotal(total);
         }
 
         if (order.getDeliveryDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("Delivery date cannot be in the past");
+            throw new BadRequestException("Delivery date cannot be in the past");
         }
 
-        if (order.getOrderStatus() == null) {
-            order.setOrderStatus(OrderStatus.PENDING);
-        }
+        order.setOrderStatus(OrderStatus.PENDING);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        return OrderMapper.toResponse(savedOrder);
     }
 
     @Override
-    public Order update(Long id, Order order) {
-        Order existing = getById(id);
+    public OrderResponseDTO update(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO) {
+        Order existing = orderRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
-        existing.setClientName(order.getClientName());
-        existing.setTelephone(order.getTelephone());
-        existing.setDeliveryDate(order.getDeliveryDate());
-        existing.setOrderStatus(order.getOrderStatus());
+        existing.setClientName(orderUpdateRequestDTO.getClientName().trim());
 
-        return orderRepository.save(existing);
+        existing.setTelephone(orderUpdateRequestDTO.getTelephone().trim());
+
+        existing.setComments(orderUpdateRequestDTO.getComments());
+
+        existing.setDeliveryDate(orderUpdateRequestDTO.getDeliveryDate());
+
+        if (existing.getDeliveryDate().isBefore(LocalDate.now())) {
+            throw new BadRequestException("Delivery date cannot be in the past");
+        }
+
+        Order updated = orderRepository.save(existing);
+
+        return OrderMapper.toResponse(updated);
     }
 
     @Override
     public void delete(Long id) {
-        Order exists = getById(id);
+        Order existing = orderRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
-        orderRepository.delete(exists);
+        orderRepository.delete(existing);
     }
 }
