@@ -2,6 +2,7 @@ package com.deliciasmolina.deliciasmolinaapi.service.impl;
 
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderItemRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderUpdateRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Order;
 import com.deliciasmolina.deliciasmolinaapi.entity.OrderDetail;
@@ -75,6 +76,8 @@ public class OrderServiceImpl implements OrderService {
 
             Set<Long> productIds = new HashSet<>();
 
+            BigDecimal total = BigDecimal.ZERO;
+
             for (OrderItemRequestDTO item : orderRequestDTO.getItems()) {
 
                 if (!productIds.add(item.getProductId())) {
@@ -92,10 +95,16 @@ public class OrderServiceImpl implements OrderService {
 
                 detail.setUnitPrice(product.getBasePrice());
 
-                detail.setSubtotal(product.getBasePrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+                BigDecimal subtotal = product.getBasePrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                detail.setSubtotal(subtotal);
+
+                total = total.add(subtotal);
 
                 order.addOrderDetail(detail);
             }
+
+            order.setTotal(total);
         }
 
         if (order.getDeliveryDate().isBefore(LocalDate.now())) {
@@ -110,28 +119,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponseDTO update(Long id, OrderRequestDTO orderRequestDTO) {
+    public OrderResponseDTO update(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO) {
         Order existing = orderRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
-        OrderMapper.updateEntity(existing, orderRequestDTO);
+        existing.setClientName(orderUpdateRequestDTO.getClientName().trim());
 
-        if (existing.getOrderType() == OrderType.CUSTOM) {
-            if (existing.getFlavor() == null || existing.getFlavor().isBlank()) {
-                throw new BadRequestException("Flavor is required");
-            }
+        existing.setTelephone(orderUpdateRequestDTO.getTelephone().trim());
 
-            if (existing.getPeopleQuantity() == null) {
-                throw new BadRequestException("People quantity is required");
-            }
+        existing.setComments(orderUpdateRequestDTO.getComments());
 
-            existing.setCustomQuotedPrice(null);
-        } else {
-            existing.setFlavor(null);
-            existing.setPeopleQuantity(null);
-            existing.setImageReference(null);
-            existing.setComments(null);
-        }
+        existing.setDeliveryDate(orderUpdateRequestDTO.getDeliveryDate());
 
         if (existing.getDeliveryDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("Delivery date cannot be in the past");

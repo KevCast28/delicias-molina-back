@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class OrderResponseDTO {
@@ -17,7 +18,9 @@ public class OrderResponseDTO {
     private Integer peopleQuantity;
     private String imageReference;
     private String comments;
-    private BigDecimal quotedPrice;
+    private BigDecimal customQuotedPrice;
+    private BigDecimal total;
     private LocalDate deliveryDate;
     private OrderStatus orderStatus;
+    private List<OrderItemResponseDTO> items;
 }

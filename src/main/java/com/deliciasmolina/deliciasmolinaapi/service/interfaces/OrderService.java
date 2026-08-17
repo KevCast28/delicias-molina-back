@@ -1,6 +1,7 @@
 package com.deliciasmolina.deliciasmolinaapi.service.interfaces;
 
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderUpdateRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.entity.Order;
 
@@ -13,7 +14,7 @@ public interface OrderService {
 
     OrderResponseDTO create(OrderRequestDTO orderRequestDTO);
 
-    OrderResponseDTO update(Long id, OrderRequestDTO orderRequestDTO);
+    OrderResponseDTO update(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO);
 
     void delete(Long id);
 }

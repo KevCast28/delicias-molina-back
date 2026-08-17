@@ -52,6 +52,7 @@ public class Order {
         detail.setOrder(this);
         this.orderDetails.add(detail);
     }
+    private BigDecimal total;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

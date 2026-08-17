@@ -1,6 +1,7 @@
 package com.deliciasmolina.deliciasmolinaapi.controller;
 
 import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderRequestDTO;
+import com.deliciasmolina.deliciasmolinaapi.dto.Request.OrderUpdateRequestDTO;
 import com.deliciasmolina.deliciasmolinaapi.dto.Response.OrderResponseDTO;
 import com.deliciasmolina.deliciasmolinaapi.service.interfaces.OrderService;
 import jakarta.validation.Valid;
@@ -39,8 +40,8 @@ public class OrderController {
 
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<OrderResponseDTO> update(@PathVariable Long id, @Valid @RequestBody OrderRequestDTO orderRequestDTO) {
-        return ResponseEntity.ok(orderService.update(id, orderRequestDTO));
+    public ResponseEntity<OrderResponseDTO> update(@PathVariable Long id, @Valid @RequestBody OrderUpdateRequestDTO orderUpdateRequestDTO) {
+        return ResponseEntity.ok(orderService.update(id, orderUpdateRequestDTO));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
