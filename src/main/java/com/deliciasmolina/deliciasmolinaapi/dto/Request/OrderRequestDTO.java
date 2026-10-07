@@ -28,7 +28,6 @@ public class OrderRequestDTO {
     private String comments;
     @NotNull(message = "Delivery date is required")
     private LocalDate deliveryDate;
-    @NotEmpty(message = "Order must contain at least one item")
     @Valid
     private List<OrderItemRequestDTO> items;
 }

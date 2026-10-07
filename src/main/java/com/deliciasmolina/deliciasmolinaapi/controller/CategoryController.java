@@ -19,13 +19,11 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @GetMapping
     public ResponseEntity<List<CategoryResponseDTO>> getAll() {
         return ResponseEntity.ok(categoryService.getAll());
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.getById(id));

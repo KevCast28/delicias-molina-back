@@ -84,10 +84,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(Long id, ChangePasswordRequestDTO changePasswordRequestDTO) {
+    public void changePassword(String username, ChangePasswordRequestDTO changePasswordRequestDTO) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+
+        if (user.getPassword() == null) {
+            throw new BadRequestException("Invalid user state");
+        }
 
         if (!passwordEncoder.matches(changePasswordRequestDTO.getCurrentPassword(), user.getPassword())) {
             throw new BadRequestException("Current password is incorrect");
@@ -95,10 +99,6 @@ public class UserServiceImpl implements UserService {
 
         if (passwordEncoder.matches(changePasswordRequestDTO.getNewPassword(), user.getPassword())) {
             throw new BadRequestException("New password cannot be the same as current password");
-        }
-
-        if (user.getPassword() == null) {
-            throw new BadRequestException("Invalid user state");
         }
 
         user.setPassword(passwordEncoder.encode(changePasswordRequestDTO.getNewPassword()));
