@@ -17,7 +17,7 @@ public interface UserService {
 
     UserResponseDTO update(Long id, UserUpdateRequestDTO userUpdateRequestDTO);
 
-    void changePassword(Long id, ChangePasswordRequestDTO changePasswordRequestDTO);
+    void changePassword(String username, ChangePasswordRequestDTO changePasswordRequestDTO);
 
     UserResponseDTO activate(Long id);
 

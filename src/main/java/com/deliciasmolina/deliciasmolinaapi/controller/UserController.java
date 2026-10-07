@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -45,9 +46,9 @@ public class UserController {
         return ResponseEntity.ok(userService.update(id, userUpdateRequestDTO));
     }
 
-    @PatchMapping("/{id}/password")
-    public ResponseEntity<Void> changePassword(@PathVariable Long id, @Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
-        userService.changePassword(id, changePasswordRequestDTO);
+    @PatchMapping("/me/password")
+    public ResponseEntity<Void> changePassword(Authentication authentication, @Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
+        userService.changePassword(authentication.getName(), changePasswordRequestDTO);
 
         return ResponseEntity.noContent().build();
     }

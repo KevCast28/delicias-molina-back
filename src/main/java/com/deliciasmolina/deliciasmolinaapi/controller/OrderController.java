@@ -32,7 +32,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getById(id));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @PostMapping
     public ResponseEntity<OrderResponseDTO> create(@Valid @RequestBody OrderRequestDTO orderRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(orderRequestDTO));
